@@ -1,10 +1,10 @@
 # practGo
 Как можно работать с таблицами в MySQL на Go (Golang)
 
-Запустить сервер через run_select.bat, перейти по ссылке: http://localhost:8181/postform
+Запустить сервер через run_select.bat, перейти по ссылке: http://localhost:8181/
 На экране будет примерно следующее:
 
-![image](https://user-images.githubusercontent.com/10297748/229186658-9cccb3e9-4133-4ed9-879f-1c3e73e92068.png)
+![image](https://user-images.githubusercontent.com/10297748/229227767-a8121b31-2977-4248-bb0f-53b302c29e83.png)
 
 Сайт на Go (Golang) гарантированно работает при установленных программах и компонентах под Windows 11:
 1) Go версии: go1.20.2 windows/amd64 в каталог: c:\Go\bin (из файла: go1.20.2.windows-amd64.msi);
