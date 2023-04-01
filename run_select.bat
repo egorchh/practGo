@@ -1,2 +1,1 @@
-cd C:\xampp\htdocs\practGo
-C:\Go\bin\go run C:\xampp\htdocs\practGo\select.go
+c:\Go\bin\go run select.go
