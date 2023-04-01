@@ -77,7 +77,7 @@ func viewSelect(w http.ResponseWriter, db *sql.DB) {
     }
 
 	// чтение файла и выгрузка значений из массива.
-	file, err := os.Open("user.html")
+	file, err := os.Open("select.html")
 	if err != nil {
 		log.Fatal(err)
 	}
