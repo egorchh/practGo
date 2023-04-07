@@ -23,10 +23,14 @@ tr:nth-child(odd) {
 tr:nth-child(even) { 
 	background-color: #B4DAF2; 
 }
+tr:first-child { 
+	background-color: #00add9;
+	font-weight: bold;
+}
 tr {
 	opacity: 0.77;
 }
-tr:hover {
+tr:nth-child(n+2):hover {
 	color: #fff;
 	cursor: pointer;
 	font-weight: bold;
@@ -37,6 +41,10 @@ td {
     position: relative;
     border: 1px solid #333;
     height: 20px;
+}
+td:first-child {
+	width: 35px;
+	text-align: center;
 }
 h1, h1 a:visited {
 	color: #00add9;
@@ -70,5 +78,10 @@ input[type="submit"] {
 		<table>
 @tr
 		</table>
+		<p>Версия базы данных: 
+			<b>
+@ver
+			</b>
+		</p>
     </body>
 </html>
