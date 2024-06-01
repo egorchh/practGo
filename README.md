@@ -4,7 +4,8 @@
 Запустить сервер через run_select.bat, перейти по ссылке: http://localhost:8181/
 На экране будет примерно следующее:
 
-![image](https://user-images.githubusercontent.com/10297748/230652730-1a173692-012f-42f9-8967-f417f27d7f22.png)
+<img width="1016" alt="Screenshot 2024-06-01 at 19 48 18" src="https://github.com/egorchh/practGo/assets/93445522/36bc48cb-6cd4-4421-bf2e-5106199ac33f">
+
 
 Сайт на Go (Golang) гарантированно работает при установленных программах и компонентах под Windows 11:
 1) Go версии: go1.20.2 windows/amd64 в каталог: c:\Go\bin (из файла: go1.20.2.windows-amd64.msi);
