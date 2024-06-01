@@ -1,140 +1,167 @@
 package main
+
 import (
+	"bufio"
+	"database/sql"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"log"
+	"net/http"
+	"os"
 	"strconv"
-    "bufio"
-    "fmt"
-	//"reflect"
-    "log"
-    "os"
-    "net/http"
-    "database/sql"
-    _ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
-    db, err := sql.Open("mysql", "root:@/test")
-     
-    if err != nil {
-        panic(err)
-    } 
-    defer db.Close()
-	
-	// открытие из браузера корневого каталога.
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
-	
+	db, err := sql.Open("mysql", "root:password@/bank")
+	if err != nil {
+		log.Fatalf("Error opening database: %v", err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		log.Fatalf("Error connecting to database: %v", err)
+	}
+	defer db.Close()
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
 		viewSelect(w, db)
-    })
+	})
 
 	// сохранение отправленных значений через поля формы.
-	http.HandleFunc("/postform", func(w http.ResponseWriter, r *http.Request){
-     
-        val1 := r.FormValue("col1")
-        val2 := r.FormValue("col2")
-        val3 := r.FormValue("col3")
-		sQuery := "INSERT INTO myarttable (text, description, keywords) VALUES ('"+val1+"', '"+val2+"', '"+val3+"')"
- 
+	http.HandleFunc("/postform", func(w http.ResponseWriter, r *http.Request) {
+
+		firstName := r.FormValue("first_name")
+		lastName := r.FormValue("last_name")
+		patronymic := r.FormValue("patronymic")
+		passport := r.FormValue("passport")
+		tin := r.FormValue("tin")
+		snils := r.FormValue("snils")
+		driverLicense := r.FormValue("driver_license")
+		additionalDocuments := r.FormValue("additional_documents")
+		notes := r.FormValue("notes")
+		borrowerId := r.FormValue("borrower_id")
+
+		sQuery := ""
+		var rows *sql.Rows
+		var err error
+
+		if borrowerId == "" {
+			sQuery = "INSERT INTO individuals (first_name, last_name, patronymic, passport, tin, snils, driver_license, additional_documents, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+			rows, err = db.Query(sQuery, firstName, lastName, patronymic, passport, tin, snils, driverLicense, additionalDocuments, notes)
+		} else {
+			sQuery = "INSERT INTO individuals (first_name, last_name, patronymic, passport, tin, snils, driver_license, additional_documents, notes, borrower_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+			rows, err = db.Query(sQuery, firstName, lastName, patronymic, passport, tin, snils, driverLicense, additionalDocuments, notes, borrowerId)
+		}
+
 		fmt.Println(sQuery)
- 
-		rows, err := db.Query(sQuery)
+
 		if err != nil {
 			panic(err)
-		}		
+		}
 		defer rows.Close()
-		
-		viewSelect(w, db)
-    })
-	
 
-    fmt.Println("Server is listening on http://localhost:8181/")
-    http.ListenAndServe(":8181", nil)	
+		viewSelect(w, db)
+	})
+
+	fmt.Println("Server is listening on http://localhost:8181/")
+	http.ListenAndServe(":8181", nil)
 }
 
-
-// отправка в браузер заголовка таблицы.
 func viewHeadQuery(w http.ResponseWriter, db *sql.DB, sShow string) {
 	type sHead struct {
 		clnme string
 	}
-    rows, err := db.Query(sShow)
-    if err != nil {
-        panic(err)
-    }
-    defer rows.Close()
+	rows, err := db.Query(sShow)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
 
 	fmt.Fprintf(w, "<tr>")
-	i := 0
-     for i < 4 {
-		rows.Next()
-        p := sHead{}
-        err := rows.Scan(&p.clnme)
-        if err != nil{
-            fmt.Println(err)
-            continue
-        }
-		fmt.Fprintf(w, "<td>"+p.clnme+"</td>")
-		i++
-    }
+	for rows.Next() {
+		var p sHead
+		err := rows.Scan(&p.clnme)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, "<td>%s</td>", p.clnme)
+	}
 	fmt.Fprintf(w, "</tr>")
+
+	if err := rows.Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
-// отправка в браузер строк из таблицы.
 func viewSelectQuery(w http.ResponseWriter, db *sql.DB, sSelect string) {
-	type test struct {
-		id int
-		text string
-		description string
-		keywords string
+	type individual struct {
+		id                  int
+		firstName           string
+		lastName            string
+		patronymic          string
+		passport            string
+		tin                 string
+		snils               string
+		driverLicense       string
+		additionalDocuments string
+		notes               string
+		borrowerId          sql.NullInt64
 	}
-	tests := []test{}
-	//fmt.Println(reflect.TypeOf(tests))
+	individuals := []individual{}
 
 	// получение значений в массив tests из струкрур типа test.
-    rows, err := db.Query(sSelect)
-    if err != nil {
-        panic(err)
-    }
-    defer rows.Close()
-     
-    for rows.Next(){
-        p := test{}
-        err := rows.Scan(&p.id, &p.text, &p.description, &p.keywords)
-        if err != nil{
-            fmt.Println(err)
-            continue
-        }
-        tests = append(tests, p)
-    }
-	
+	rows, err := db.Query(sSelect)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		p := individual{}
+		err := rows.Scan(&p.id, &p.firstName, &p.lastName, &p.patronymic, &p.passport, &p.tin, &p.snils, &p.driverLicense, &p.additionalDocuments, &p.notes, &p.borrowerId)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		individuals = append(individuals, p)
+	}
+
 	// перебор массива из БД.
-	for _, p := range tests {
-		fmt.Fprintf(w, "<tr><td>"+strconv.Itoa(p.id)+"</td><td>"+p.text+"</td><td>"+p.description+"</td><td>"+p.keywords+"</td></tr>")
+	for _, p := range individuals {
+		fmt.Fprintf(w, "<tr><td>"+strconv.Itoa(p.id)+"</td><td>"+p.firstName+"</td><td>"+p.lastName+"</td><td>"+p.patronymic+"</td><td>"+p.passport+"</td><td>"+p.tin+"</td><td>"+p.snils+"</td><td>"+p.driverLicense+"</td><td>"+p.additionalDocuments+"</td><td>"+p.notes+"</td><td>"+strconv.FormatInt(p.borrowerId.Int64, 10)+"</td></tr>")
 	}
 }
-	
-// отправка в браузер версии базы данных.
-func viewSelectVerQuery (w http.ResponseWriter, db *sql.DB, sSelect string) {
+
+func viewSelectVerQuery(w http.ResponseWriter, db *sql.DB, sSelect string) {
 	type sVer struct {
 		ver string
 	}
-    rows, err := db.Query(sSelect)
-    if err != nil {
-        panic(err)
-    }
-    defer rows.Close()
-     for rows.Next() {
-        p := sVer{}
-        err := rows.Scan(&p.ver)
-        if err != nil{
-            fmt.Println(err)
-            continue
-        }
+	rows, err := db.Query(sSelect)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var p sVer
+		err := rows.Scan(&p.ver)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		fmt.Fprintf(w, p.ver)
-    }
+	}
+
+	if err := rows.Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
-// главная функция для показа таблицы в браузере, которая показывается при любом запросе.
 func viewSelect(w http.ResponseWriter, db *sql.DB) {
-
 	// чтение шаблона.
 	file, err := os.Open("select.html")
 	if err != nil {
@@ -149,8 +176,8 @@ func viewSelect(w http.ResponseWriter, db *sql.DB) {
 			fmt.Fprintf(w, scanner.Text())
 		}
 		if scanner.Text() == "@tr" {
-			viewHeadQuery(w, db, "select COLUMN_NAME AS clnme from information_schema.COLUMNS where TABLE_NAME='myarttable'")
-			viewSelectQuery(w, db, "SELECT * FROM myarttable WHERE id>14 ORDER BY id DESC")
+			viewHeadQuery(w, db, "select COLUMN_NAME AS clnme from information_schema.COLUMNS where TABLE_NAME='individuals' ORDER BY ORDINAL_POSITION")
+			viewSelectQuery(w, db, "SELECT * FROM individuals ORDER BY id ASC")
 		}
 		if scanner.Text() == "@ver" {
 			viewSelectVerQuery(w, db, "SELECT VERSION() AS ver")
@@ -161,4 +188,3 @@ func viewSelect(w http.ResponseWriter, db *sql.DB) {
 		log.Fatal(err)
 	}
 }
-
