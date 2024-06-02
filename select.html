@@ -8,12 +8,17 @@
 body {
 	font-family: sans-serif;
 	text-align: center;
+    margin: 0 auto;
+    width: max-content;
 }
 table {
-	margin: 0 auto;
+    width: 60vw;
     text-align: left;
-	border-collapse: collapse;
-	table-layout: fixed;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+th {
+    text-align: center;
 }
 tr:nth-child(odd) {
 	background-color: #C9E4F6;
@@ -58,10 +63,26 @@ a {
 }
 label {
 	font-size: 16px;
-	text-decoration: underline;
+	color: #d90000;
+    font-weight: bold;
+}
+input,
+select,
+textarea {
+    background: none;
+    border: 2px red solid;
+    border-radius: 8px;
+    width: 300px;
+    padding: 5px 10px;
 }
 input[type="submit"] {
 	cursor: pointer;
+}
+.input {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 8px;
 }
 .inputs-container {
     display: flex;
@@ -74,35 +95,36 @@ input[type="submit"] {
         <h1><a href=".">Как можно работать с таблицами в MySQL на GO (Golang)</a></h1>
         <form method="POST" action="postform">
             <div class="inputs-container">
-                <label>Имя:</label> <input type="text" name="first_name" value="" placeholder="Введите имя" />
                 <div class="input">
-                    <label>Фамилия:</label> <input type="text" name="last_name" value="" placeholder="Введите фамилию" />
+                    <label>Тип:</label>
+                    <select name="type">
+                        <option value="planet">Планета</option>
+                        <option value="star">Звезда</option>
+                        <option value="satellite">Спутник</option>
+                        <option value="asteroid">Астероид</option>
+                        <option value="comet">Комета</option>
+                        <option value="meteorite">Метеорит</option>
+                    </select>
                 </div>
+
                 <div class="input">
-                    <label>Отчество:</label> <input type="text" name="patronymic" value="" placeholder="Введите отчество" />
+                    <label>Точность:</label> <input type="number" name="accuracy" value="" placeholder="Введите точность" />
                 </div>
+
                 <div class="input">
-                    <label>Паспорт:</label> <input type="text" name="passport" value="" placeholder="Введите паспорт" />
+                    <label>Количество:</label> <input type="number" name="quantity" value="" placeholder="Введите количество" />
                 </div>
+
                 <div class="input">
-                    <label>ИНН:</label> <input type="text" name="tin" value="" placeholder="Введите ИНН" />
+                    <label>Время:</label> <input type="time" name="time" value="" placeholder="Введите время" />
                 </div>
+
                 <div class="input">
-                    <label>СНИЛС:</label> <input type="text" name="snils" value="" placeholder="Введите СНИЛС" />
+                    <label>Дата:</label> <input type="date" name="date" value="" placeholder="Введите дату" />
                 </div>
+
                 <div class="input">
-                    <label>Права:</label> <input type="text" name="driver_license" value=""
-                                                                      placeholder="Введите водительское удостоверение" />
-                </div>
-                <div class="input">
-                    <label>Другие документы:</label> <input type="text" name="additional_documents" value=""
-                                                                    placeholder="Введите дополнительные документы" />
-                </div>
-                <div class="input">
-                    <label>Заметки:</label> <input type="text" name="notes" value="" placeholder="Введите заметки" />
-                </div>
-                <div class="input">
-                    <label>Идентификатор заемщика:</label> <input type="number" name="borrower_id" value="" placeholder="Введите ID заемщика" />
+                    <label>Примечание:</label> <textarea name="notes" value="" placeholder="Введите примечание"></textarea>
                 </div>
             </div>
             <input type="submit" value="Добавить" />
